@@ -1,105 +1,91 @@
 import csv, os
+from pathlib import Path
 
-__location__ = os.path.realpath(
-    os.path.join(os.getcwd(), os.path.dirname(__file__)))
+class DataLoader:
+    """Handles loading CSV data files."""
+    
+    def __init__(self, base_path=None):
+        """Initialize the DataLoader with a base path for data files.
+        """
+        if base_path is None:
+            self.base_path = Path(__file__).parent.resolve()
+        else:
+            self.base_path = Path(base_path)
+    
+    def load_csv(self, filename):
+        """Load a CSV file and return its contents as a list of dictionaries.
+        """
+        filepath = self.base_path / filename
+        data = []
+        
+        with filepath.open() as f:
+            rows = csv.DictReader(f)
+            for row in rows:
+                data.append(dict(row))
+        
+        return data
+    
+class Table:
+    def __init__(self, key, dic):
+        self.key = key           
+        self.table = dic
 
-cities = []
-with open(os.path.join(__location__, 'Cities.csv')) as f:
-    rows = csv.DictReader(f)
-    for r in rows:
-        cities.append(dict(r))
+    def aggregate(self, aggregation_function, aggregation_key):
+        temp = []
+        for i in self.table:
+            try:
+                temp.append( float(i[aggregation_key]) )
+            except:
+                temp.append( i[aggregation_key] )
+        return aggregation_function(temp)
+    
+    def filter(self, condition):
+        temps = []
+        for item in self.table:
+            if condition(item):
+                temps.append(item)        
+        return Table('cities',temps)
 
-# Print first 5 cities only
-for city in cities[:5]:
-    print(city)
+
+loader = DataLoader()
+cities = loader.load_csv('Cities.csv')
+my_table1 = Table('cities', cities)
 
 # Print the average temperature of all the cities
-print("The average temperature of all the cities:")
-temps = []
-for city in cities:
-    temps.append(float(city['temperature']))
-print(sum(temps)/len(temps))
+my_value = my_table1.aggregate(lambda x: sum(x)/len(x), 'temperature')
+print(my_value)
 print()
-
-# Print the average temperature of all the cities
-print("The average temperature of all the cities:")
-temps = [float(city['temperature']) for city in cities]
-print(sum(temps)/len(temps))
-print()
-
-# Let's write a function to filter out only items that meet the condition
-# Hint: condition will be associated with an anonymous function, e.x., lamdbda x: max(x)
-def filter(condition, dict_list):
-    temps = []
-    for item in dict_list:
-        if condition(item):
-            temps.append(item)
-    return temps
-
-# Template for using filter
-# ger_filtered = filter(lambda x: x['country']=="Germany", cities)
-# print(ger_filtered)
-
-# Let's write a function to do aggregation given an aggregation function and an aggregation key
-def aggregate(aggregation_key, aggregation_function, dict_list):
-    temp = []
-    for i in dict_list:
-        temp.append(i[aggregation_key])
-    return aggregation_function(temp)
-            
 
 # Print all cities in Germany
-print("All Germans")
-ger_filtered = filter(lambda x: x['country']=="Germany", cities)
-for i in ger_filtered:
-    print(i)
-# germans = []
-# for cit in cities:
-#     if cit['country'] == 'Germany':
-#         germans.append(float(cit['temperature']))
-#         print(cit)
-
+my_cities = my_table1.filter(lambda x: x['country'] == 'Germany')
+cities_list = [[city['city'], city['country']] for city in my_cities.table]
+print("All the cities in Germany:")
+for city in cities_list:
+    print(city)
+print()
 
 # Print all cities in Spain with a temperature above 12°C
-print("\nPrint all cities in Spain with a temperature above 12°C")
-sp_filtered = filter(lambda x:x['country'] == "Spain" and float(x['temperature']) > 12, cities)
-for i in sp_filtered:
-    print(i)
-# for cit in cities:
-#     if cit['country'] == 'Spain' and float(cit['temperature']) > 12:
-#         print(cit)
-
+my_cities = my_table1.filter(lambda x: x['country'] == 'Spain' and float(x['temperature']) > 12.0)
+cities_list = [[city['city'], city['country'], city['temperature']] for city in my_cities.table]
+print("All the cities in Spain with temperature above 12°C:")
+for city in cities_list:
+    print(city)
+print()
 
 # Count the number of unique countries
-print("\nCount the number of unique countries:")
-unique = aggregate('country', lambda x:len(set(x)), cities)
-print(unique)
-# uni_count = []
-# stack = 0
-# for cit in cities:
-#     if cit['country'] not in uni_count:
-#         stack += 1
-#         uni_count.append(cit['country'])
-# print(stack)
+my_countries = my_table1.aggregate(lambda x: len(set(x)), 'country')
+print("The number of unique countries is:")
+print(my_countries)
+print()
 
-
-# # Print the average temperature for all the cities in Germany
-print("\nPrint the average temperature for all the cities in Germany")
-fil_ger = filter(lambda x:x['country'] == "Germany", cities)
-tota = aggregate('temperature', lambda x: [float(i) for i in x], fil_ger)
-print( sum(tota)/len(tota) )
-# total = sum(germans)
-# print(f"Average: {total/len(germans)}")
-
+# Print the average temperature for all the cities in Germany
+my_value = my_table1.filter(lambda x: x['country'] == 'Germany').aggregate(lambda x: sum(x)/len(x), 'temperature')
+print("The average temperature of all the cities in Germany:")
+print(my_value)
+print()
 
 # Print the max temperature for all the cities in Italy
-print("\nPrint the max temperature for all the cities in Italy")
-fil_ita = filter(lambda x:x['country'] == "Italy", cities)
-ita_max_temp = aggregate('temperature', lambda x:[float(i) for i in x], fil_ita)
-print(max(ita_max_temp))
-
-# ita = []
-# for cit in cities:
-#     if cit['country'] == 'Italy':
-#         ita.append(float(cit['temperature']))
-# print(f"Max temp in Italia: {max(ita)}")
+my_value = my_table1.filter(lambda x: x['country'] == 'Italy').aggregate(lambda x: max(x), 'temperature')
+print("The max temperature of all the cities in Italy:")
+print(my_value)
+print()
