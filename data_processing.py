@@ -60,7 +60,7 @@ class Table:
         for item in self.table:
             if condition(item):
                 temps.append(item)        
-        return Table('cities',temps)
+        return Table(f'{list(temps[0].keys())[0].replace("y", "")}ies_filtered',temps)
         
 
     def join(self, oth, key):        
@@ -68,11 +68,12 @@ class Table:
         for r1 in self.table:            
             for r2 in oth.table:
                 if r1[key] == r2[key]:
-                    d_join = {}
-                    for k, v in r1.items():
-                        d_join[k] = v
-                    for k, v in r2.items():
-                        d_join[k] = v
+                    d_join = r1
+                    d_join.update(r2)                    
+                    # for k, v in r1.items():
+                    #     d_join[k] = v
+                    # for k, v in r2.items():
+                    #     d_join[k] = v
                     temp.append(d_join)
         return Table(self.table_name, temp)        
 
