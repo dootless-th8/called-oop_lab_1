@@ -7,16 +7,24 @@
  * |---- data_processing.py	  # The analysis code
 
 ## Methods;
-#### Class Dataloader:
+### Class Dataloader:
 * ##### DataLoader is for transfering .csv file into each text lines from respective path, then collecting them in dictionary.
     * ##### Method __init__(self, base_path=None): Initialize the DataLoader with a base path for data files. 
     * ##### Method load_csv(self, filename): Load a CSV file and return its contents as a list of dictionaries.
 
-#### Class Table:
+### Class DB:
+* ##### DB is basically a database.
+    * ##### Method __init__(self): For storing dict variable for return purpose.
+    * ##### Method insert(self, table): Transporting the value from the table argument.
+    * ##### Method search(self, f_name): Find the corresponding key and return the value. 
+### Class Table:
 * ##### Table is for handling the good stuffs. 
     * ##### Method __init__(self, key, dic): Initialize data in dictionary format.
     * ##### Method aggregate(self, aggregation_function, aggregation_key): As the name suggest, aggregate as the requirement according to the aggregation_function which required lambda buli-in methods to process the operation.
     * ##### filter(self, condition): Just filtering all the data and return value as Table object as propmt via condition using lambda method.
+    * ##### join(self, oth, key): For merging the table with the one in 'oth' argument with corresponding 'key' argument.   
+    * ##### __str__(self): For printing the table of the object.
 
 ## Run the program
-#### First, make three variables such as 'loader' for Dataloader, 'cities' for getting all the goods from the 'Cities.csv' file then create a "Table" object out of 'cities'. Anything else just experiment with it just that it is reccomended to use lambda to make use the best out of this program.
+#### First, make three variables such as 'loader' for Dataloader, 'cities' for getting all the goods from the 'Cities.csv' file then create a "Table" object out of 'cities'. 
+#### Anything else just experiment with it just that it is reccomended to use lambda to make use the best out of this program.
